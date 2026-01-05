@@ -1,56 +1,88 @@
+# plot_elevation.py
 from skyfield.api import load, EarthSatellite, wgs84
 from datetime import timedelta
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
 
-# 1. Load time scale
+# ---------------------------
+# 1 Load satellite TLE and observer
+# ---------------------------
 ts = load.timescale()
 
-# 2. NOAA 19 TLE (example — will update later)
+# Example NOAA 19 TLE (replace with real TLEs from CelesTrak later)
 line1 = "1 33591U 09005A   24001.12345678  .00000023  00000+0  34567-4 0  9991"
 line2 = "2 33591  99.1945  12.3456 0012345 123.4567 234.5678 14.12456789123456"
 
 sat = EarthSatellite(line1, line2, "NOAA 19", ts)
 
-# 3. Observer location (change to your city later)
+# Observer location (example: New York City)
 observer = wgs84.latlon(40.7128, -74.0060)
 
-# 4. Find the next pass
+# ---------------------------
+# 2 Predict all passes in the next 24 hours
+# ---------------------------
 t0 = ts.now()
 t1 = ts.now() + timedelta(hours=24)
 
 t_events, events = sat.find_events(observer, t0, t1, altitude_degrees=0.0)
 
-# Find the first complete pass
+# Extract all complete passes
+passes = []
 rise_time = None
-set_time = None
-
 for t, event in zip(t_events, events):
-    if event == 0 and rise_time is None:
+    if event == 0:  # rise
         rise_time = t
-    elif event == 2 and rise_time is not None:
+    elif event == 2 and rise_time is not None:  # set
         set_time = t
-        break
+        passes.append((rise_time, set_time))
+        rise_time = None
 
-if rise_time is None or set_time is None:
-    raise RuntimeError("No complete pass found.")
+if not passes:
+    raise RuntimeError("No complete passes found in the next 24 hours.")
 
-# 5. Sample times during the pass (every 10 seconds)
-duration_seconds = int((set_time.utc_datetime() - rise_time.utc_datetime()).total_seconds())
-times = ts.utc(
-    rise_time.utc_datetime() + np.array([timedelta(seconds=s) for s in range(0, duration_seconds, 10)])
-)
+# ---------------------------
+# 3 Plot each pass with elevation & signal strength
+# ---------------------------
+plt.figure(figsize=(10,5))
 
-# 6. Compute elevation angles
-difference = sat.at(times) - observer.at(times)
-topocentric = difference.altaz()
-elevation = topocentric[0].degrees
+for i, (rise, set_) in enumerate(passes, start=1):
+    # Sample times every 10 seconds
+    duration_seconds = int((set_.utc_datetime() - rise.utc_datetime()).total_seconds())
+    times_pass = ts.utc(
+        rise.utc_datetime() + np.array([timedelta(seconds=s) for s in range(0, duration_seconds, 10)])
+    )
+    
+    # Compute elevation
+    elevation_pass = (sat.at(times_pass) - observer.at(times_pass)).altaz()[0].degrees
+    
+    # Compute approximate signal strength (sin of elevation, scaled to y-axis)
+    signal_strength = np.sin(np.radians(elevation_pass)) * 90
+    
+    # UTC times for x-axis
+    utc_times_pass = [t.utc_datetime() for t in times_pass]
+    
+    # Plot elevation curve
+    plt.plot(utc_times_pass, elevation_pass, label=f'Pass {i} Start {rise.utc_strftime("%H:%M")}')
+    
+    # Plot signal strength overlay (dashed)
+    plt.plot(utc_times_pass, signal_strength, '--', label=f'Signal (Pass {i})')
+    
+    # Annotate max elevation
+    max_idx = np.argmax(elevation_pass)
+    plt.text(utc_times_pass[max_idx], elevation_pass[max_idx]+5, f'Max {int(elevation_pass[max_idx])}°',
+             ha='center', color='blue')
 
-# 7. Plot
-plt.figure()
-plt.plot(range(len(elevation)), elevation)
-plt.xlabel("Time steps (10 s each)")
-plt.ylabel("Elevation angle (degrees)")
-plt.title("NOAA Satellite Elevation vs Time")
+# ---------------------------
+# 4 Format plot
+# ---------------------------
+plt.xlabel("UTC Time")
+plt.ylabel("Elevation Angle (degrees)")
+plt.title("NOAA Satellite Passes and Predicted Signal Strength")
+plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
+plt.xticks(rotation=45)
 plt.grid(True)
+plt.legend()
+plt.tight_layout()
 plt.show()
+
