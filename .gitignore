@@ -1,1 +1,11 @@
+# Ignore raw satellite data
+data/raw/
+data/decoded/
+
+# Ignore audio files
+*.wav
+
+# Ignore Python cache
+__pycache__/
+*.pyc
 
