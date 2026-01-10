@@ -1,3 +1,2 @@
 # Signal Decoding
-
-This folder contains tools and scripts for decoding NOAA APT satellite signals.
+We used an external NOAA APT decoder to convert audio recordings into images.
