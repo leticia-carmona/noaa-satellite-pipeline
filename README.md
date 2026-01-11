@@ -11,9 +11,39 @@ This project demonstrates a low-cost system for retrieving, decoding, and visual
 
 > Note: NOAA APT signals are no longer publicly available, so we are focusing on CubeSat data.
 
----
 
 ## Repository Structure
+
+---
+
+## Workflow Overview
+
+1. **Retrieve Data**
+   - Download CubeSat recordings from SatNOGS or capture with hardware (RTL-SDR + antenna).
+   - Store recordings in `data/raw/`.
+
+2. **Decode Data**
+   - Convert recordings into images or telemetry using decoding tools or Python scripts.
+   - Save outputs in `data/decoded/`.
+
+3. **Analyze & Visualize**
+   - Use Python scripts to plot:
+     - Satellite elevation vs time
+     - Signal strength
+     - Decoded telemetry or reconstructed images
+   - Organize plots and images for comparison.
+
+4. **Compare**
+   - Another teammate compares decoded data to CubeSat reference data.
+   - Insights and summaries are generated from this comparison.
+
+---
+
+## Notes
+
+- `.gitignore` ensures large files (raw recordings, decoded images) are **not pushed to GitHub**.
+- All Python scripts are designed to work on local machines using VS Code.
+- All satellite predictions use public TLEs from [CelesTrak](https://www.celestrak.com/NORAD/elements/).
 
 
 
