@@ -14,7 +14,6 @@ This project demonstrates a low-cost system for retrieving, decoding, and visual
 
 ## Repository Structure
 
----
 
 ## Workflow Overview
 
