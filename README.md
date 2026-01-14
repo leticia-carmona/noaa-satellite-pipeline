@@ -1,48 +1,100 @@
-# CubeSat Data Pipeline Project
+# CubeSat Radio Signal Processing Pipeline
 
-## Project Overview
-This project demonstrates a low-cost system for retrieving, decoding, and visualizing data from CubeSats. Our system processes satellite recordings, decodes the signals, and visualizes the data alongside predicted satellite passes.
+This project implements an end-to-end pipeline for retrieving, decoding, and analyzing radio signals transmitted by CubeSats. The system processes real satellite radio-frequency data obtained from publicly available ground-station recordings and converts it into interpretable visualizations tied to satellite orbital geometry.
 
-**Key Focus Areas:**
-- Retrieving CubeSat recordings (from public databases or SDR hardware)
-- Decoding signals into meaningful data (images or telemetry)
-- Displaying results clearly for analysis
-- Comparing results to CubeSat reference data (done by another teammate)
-
-> Note: NOAA APT signals are no longer publicly available, so we are focusing on CubeSat data.
-
-
-## Repository Structure
-
-
-## Workflow Overview
-
-1. **Retrieve Data**
-   - Download CubeSat recordings from SatNOGS or capture with hardware (RTL-SDR + antenna).
-   - Store recordings in `data/raw/`.
-
-2. **Decode Data**
-   - Convert recordings into images or telemetry using decoding tools or Python scripts.
-   - Save outputs in `data/decoded/`.
-
-3. **Analyze & Visualize**
-   - Use Python scripts to plot:
-     - Satellite elevation vs time
-     - Signal strength
-     - Decoded telemetry or reconstructed images
-   - Organize plots and images for comparison.
-
-4. **Compare**
-   - Another teammate compares decoded data to CubeSat reference data.
-   - Insights and summaries are generated from this comparison.
+The project is designed to operate without hardware initially, using recorded passes, while remaining fully compatible with future live reception using an SDR and antenna.
 
 ---
 
-## Notes
+## Project Objectives
 
-- `.gitignore` ensures large files (raw recordings, decoded images) are **not pushed to GitHub**.
-- All Python scripts are designed to work on local machines using VS Code.
-- All satellite predictions use public TLEs from [CelesTrak](https://www.celestrak.com/NORAD/elements/).
+- Retrieve real CubeSat signal recordings from public ground stations
+- Convert raw RF/audio data into a usable digital format
+- Decode continuous-wave (CW) style transmissions
+- Extract and analyze signal strength over time
+- Relate signal behavior to satellite elevation and orbital position
+- Visualize results in a clear, engineering-focused manner
 
+---
 
+## System Pipeline
 
+Satellite Transmission  
+↓  
+Ground Station Recording (SatNOGS)  
+↓  
+Raw Audio File (.ogg)  
+↓  
+Audio Conversion (.wav)  
+↓  
+Signal Decoding (CW amplitude extraction)  
+↓  
+Event Detection & Time-Series Analysis  
+↓  
+Orbital Geometry Computation  
+↓  
+Visualization & Interpretation  
+
+---
+
+## Repository Structure
+data/
+├── raw/ # Original downloaded satellite recordings
+├── processed/ # Converted WAV files used for decoding
+decoding/
+├── decode_cw.py # Extracts CW signal amplitude
+├── cw_amplitude.csv # Time vs amplitude data
+├── cw_peak_times.csv # Detected signal events
+analysis/
+├── plot_elevation_vs_time.py
+├── plot_elevation_with_amplitude.py
+docs/ # Figures, explanations, final report
+README.md
+---
+
+## Current Capabilities
+- ✔ Download CubeSat recordings from SatNOGS
+- ✔ Convert recordings to WAV format
+- ✔ Decode CW-style transmissions
+- ✔ Detect signal pulses
+- ✔ Compute satellite elevation vs time
+- ✔ Overlay signal behavior with orbital geometry
+
+---
+
+## Tools & Libraries
+- Python 3
+- NumPy, SciPy
+- Pandas
+- Matplotlib
+- Skyfield
+- FFmpeg
+- SatNOGS Open Data
+
+---
+
+## Project Status
+**Active development**
+
+Current focus:
+- Improving signal-to-orbit alignment
+- Refining decoding thresholds
+- Preparing visual results for presentation
+
+Planned extensions:
+- Live SDR reception
+- Hardware validation
+- Automated pass scheduling
+
+---
+
+## Team Roles
+- **Hardware**: Antenna, SDR setup, RF reception
+- **Signal Processing & Visualization**: Decoding, plotting, interpretation
+- **Data Comparison**: Cross-checking decoded data with CubeSat telemetry
+
+---
+
+## Disclaimer
+This project only listens to publicly available satellite transmissions.  
+No communication, control, or interference with spacecraft occurs.

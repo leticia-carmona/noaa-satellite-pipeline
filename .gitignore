@@ -1,11 +1,16 @@
-# Ignore raw satellite data
-data/raw/
-data/decoded/
+# macOS
+.DS_Store
 
-# Ignore audio files
-*.wav
-
-# Ignore Python cache
+# Python
 __pycache__/
 *.pyc
+venv/
+
+# Generated data
+decoding/*.csv
+data/processed/*.wav
+
+# Raw satellite recordings
+data/raw/*
+!data/raw/.gitkeep
 
